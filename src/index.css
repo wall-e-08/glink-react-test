@@ -199,3 +199,11 @@ body {
   background-color: oklch(0.985 0 89.876);
   /*background-color: oklch(0.563 0.221 28.289);*/
 }
+
+.text-secondary {
+  @apply text-gray-500;
+}
+
+.flex-and-center {
+  @apply flex items-center justify-center;
+}

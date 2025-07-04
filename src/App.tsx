@@ -10,9 +10,9 @@ import NetworkPanel from "@/features/NetworkPanel";
 
 function App() {
   return (
-    <div className="flex flex-row w-fit">
+    <div className="flex flex-row w-full gap-4">
       <Sidebar/>
-      <main>
+      <main className="flex-1">
         <Topbar/>
         <RefinePanel/>
         <h2>PeerSpace</h2>
