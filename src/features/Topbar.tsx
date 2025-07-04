@@ -17,7 +17,7 @@ const Topbar = (props) => {
             <img src={docImg1} alt="Profile" className="w-13 inline-block rounded-full"/>
             <div>
               <h3 className="mb-1 text-black font-bold">Emily Carter</h3>
-              <p className="text-gray-500 text-xs">Cardiologist at NHOG</p>
+              <p className="text-secondary text-xs">Cardiologist at NHOG</p>
             </div>
           </div>
         </div>
@@ -31,7 +31,7 @@ const Topbar = (props) => {
           </Button>
         </div>
       </RoundedDiv>
-      <RoundedDiv className="text-gray-500">
+      <RoundedDiv className="text-secondary">
         <div className="flex items-center space-x-2 mb-2">
           <Switch id="show-connections" />
           <Label htmlFor="show-connections">Show connections</Label>

@@ -15,8 +15,8 @@ function App() {
       <main className="flex-1">
         <Topbar/>
         <RefinePanel/>
-        <h2>PeerSpace</h2>
-        <section>
+        <h2 className="font-bold text-3xl my-4">PeerSpace</h2>
+        <section className="flex flex-row">
           <div>
             <ProfileCard/>
             <ProfileDetails/>

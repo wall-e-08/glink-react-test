@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import RoundedDiv from "../components/RoundedDiv";
+import RoundedDiv from "@/components/RoundedDiv";
 
 const ProfileCard = (props) => {
   const [state, setState] = useState()
