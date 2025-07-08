@@ -8,7 +8,7 @@ type RoundedDivProps = {
 
 const RoundedDiv = ({className, children}: RoundedDivProps) => (
   <div className={clsx(
-    "rounded-lg border border-red-500 p-3 bg-white",
+    "rounded-lg border border-transparent p-3 bg-white",
     className
   )}>
     {children}

@@ -3,25 +3,33 @@ import ForceGraph2D from "react-force-graph-2d";
 import img1 from '@/assets/doc1.jpg';
 import img2 from '@/assets/doc2.jpg';
 import img3 from '@/assets/doc3.jpg';
+import {idMaker} from "@/lib/utils";
+
 
 // todo: dummy image
 // todo: use LRU cache to load images on demand for all images
 const IMAGES = [img1, img2, img3];
 
-// Preload and cache images globally
+// Preload and cache images globally to improve performance
 const imageCache: Record<string, HTMLImageElement> = {};
 
-const dataLoadWorker = new Worker(new URL('@/workers/dataLoad.worker.ts', import.meta.url), {
-  type: 'module',
-});
+type NetworkVisualizationProps = {
+  doctorId: string;
+  category: string;
+  dataLoadWorker: Worker;
+};
 
-const NetworkVisualization = ({doctorId, category}: {doctorId: string, category: string}) => {
+const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
+  doctorId,
+  category,
+  dataLoadWorker
+}) => {
   const fgRef:RefObject<HTMLDivElement | null> = useRef(null);
   const [rawData, setRawData] = useState<any | null>(null);
   // const [graphData, setGraphData] = useState<any | null>(null);
 
   const centerId = useMemo(() => {
-    return `(\'${category}\', \'${doctorId}\')`;
+    return idMaker(category, doctorId);
   }, [doctorId, category]);
 
   useEffect(() => {
@@ -65,14 +73,14 @@ const NetworkVisualization = ({doctorId, category}: {doctorId: string, category:
     };
 
     dataLoadWorker.postMessage({
-      filePath: '/data.graphml',
+      dataType: 'PARSED_DATA',
       centerId,
     });
   }, [centerId]);
 
   // Memoize transformed graph data
   const graphData = useMemo(() => {
-    if (!rawData) return null;
+    if (!rawData || !rawData.nodes || !rawData.edges) return null;
 
     return {
       nodes: rawData.nodes.map((node: any) => ({
@@ -134,6 +142,8 @@ const NetworkVisualization = ({doctorId, category}: {doctorId: string, category:
     <div className="size-full overflow-hidden">
       <ForceGraph2D
         ref={fgRef}
+        width={window.innerWidth / 2}
+        backgroundColor="#fff"
         graphData={graphData}
         nodeCanvasObject={drawNode}
 
@@ -146,7 +156,7 @@ const NetworkVisualization = ({doctorId, category}: {doctorId: string, category:
         linkLabel={_link => _link.data?.['#text'] || ''}
         // pauseAnimation={true}
         onEngineStop={() => {
-          fgRef.current.zoomToFit(1400)
+          fgRef.current.zoomToFit(100, 40);
           // fgRef.current.zoom(1250)
         }}
       />

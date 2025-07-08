@@ -1,36 +1,58 @@
 import { XMLParser } from 'fast-xml-parser';
 
+export type DataType = "PARSED_DATA" | "DOCTORS_LIST";
+
 type WorkerMessage = {
-  filePath: string;
-  centerId: string;
+  dataType: DataType;
+  centerId?: string;
 };
 
-self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
-  const { filePath, centerId }: WorkerMessage = e.data;
+type CachedJsonGraphData = {
+  rawNodes: any[];
+  rawEdges: any[];
+  timestamp: number;
+};
 
-  if (!centerId) {
-    console.log("No centerId provided, skipping data load");
+let cachedData: CachedJsonGraphData | null = null;
+
+self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
+  const { dataType, centerId }: WorkerMessage = e.data;
+
+  if (!centerId && dataType === "PARSED_DATA") {
+    console.error("No centerId provided, skipping data load");
     return
   }
 
   console.log("centerId", centerId)
 
   try {
-    const response = await fetch(filePath);
-    const json_data = await response.text();
+    if (!cachedData) {
+      const response = await fetch('/data.graphml');
+      const json_data = await response.text();
 
-    // Parse GraphML to JSON
-    const parser = new XMLParser({
-      ignoreAttributes: false,
-      attributeNamePrefix: '',
-    });
+      // Parse GraphML to JSON
+      const parser = new XMLParser({
+        ignoreAttributes: false,
+        attributeNamePrefix: '',
+      });
 
-    // todo: typescript types
-    const json = parser.parse(json_data);
-    const graph = json.graphml.graph;
-    console.log("graph", graph)
-    let nodes = Array.isArray(graph.node) ? graph.node : [graph.node];
-    let edges = Array.isArray(graph.edge) ? graph.edge : [graph.edge];
+      // todo: typescript types
+      const json = parser.parse(json_data);
+      const graph = json.graphml.graph;
+      console.log("graph", graph)
+
+      // raw data
+      let nodes = Array.isArray(graph.node) ? graph.node : [graph.node];
+      let edges = Array.isArray(graph.edge) ? graph.edge : [graph.edge];
+
+      cachedData = {
+        rawNodes: nodes,
+        rawEdges: edges,
+        timestamp: Date.now(),
+      }
+
+      console.log("Data has been cached")
+    }
 
     // todo: confirm if the source is only match
     // edges = edges.filter(_edge => _edge.source === centerId) //|| _edge.target == centerId);
@@ -42,56 +64,74 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
     //   }))
     //   .filter(_node => _node.id === centerId);
 
-    edges = edges.filter(_edge => _edge.source === centerId || _edge.target === centerId)
-    console.log("filtered edges", edges)
+    const {rawNodes, rawEdges} = cachedData;
 
-    const nodeIds = new Set<string>();
-    nodeIds.add(centerId);
-    edges.forEach(_edge => nodeIds.add(_edge.target));
+    if (dataType === "PARSED_DATA") {
+      let edges = rawEdges.filter(_edge => _edge.source === centerId || _edge.target === centerId)
+      console.log("filtered edges", edges)
 
-    nodes = nodes.filter(_node => nodeIds.has(_node.id));  // all nodes from edges
+      const nodeIds = new Set<string>();
+      nodeIds.add(centerId);
+      edges.forEach(_edge => nodeIds.add(_edge.target));
 
-
-
-
-
+      let nodes = rawNodes.filter(_node => nodeIds.has(_node.id));  // all nodes from edges
 
 
+      // todo: check all id types, get all doctor id
 
 
+      // const filteredEdges = edges.filter(_edge => _edge.source === targetId);
+      //
+      // // all target node IDs from these edges
+      // const connectedNodeIds = new Set<string>();
+      // connectedNodeIds.add(targetId);
+      // filteredEdges.forEach(_edge => connectedNodeIds.add(_edge.target));
+      //
+      // // filter nodes based on those IDs
+      // const filteredNodes = nodes.filter((node) => connectedNodeIds.has(node.id));
 
 
+      /*filteredEdges = allEdges.filter(
+        (edge) => edge.source === targetId || edge.target === targetId
+      );
+      filteredEdges.forEach((edge) => {
+        connectedIds.add(edge.source);
+        connectedIds.add(edge.target);
+      });
 
+      filteredNodes = allNodes.filter((node) => connectedIds.has(node.id));*/
 
-    // const filteredEdges = edges.filter(_edge => _edge.source === targetId);
-    //
-    // // all target node IDs from these edges
-    // const connectedNodeIds = new Set<string>();
-    // connectedNodeIds.add(targetId);
-    // filteredEdges.forEach(_edge => connectedNodeIds.add(_edge.target));
-    //
-    // // filter nodes based on those IDs
-    // const filteredNodes = nodes.filter((node) => connectedNodeIds.has(node.id));
+      console.log("Final", {nodes, edges})
 
+      self.postMessage({
+        success: true,
+        dataType,
+        data: {nodes, edges}
+      });
+    } else if (dataType === "DOCTORS_LIST") {
+      const doctors = Array.from(
+        new Map(
+          rawNodes
+            .filter(node => node.id.startsWith("('Researcher'"))
+            .map(node => [node.id, {
+              id: node.id,
+              label: node.data?.['#text'] || 'Unknown', // todo: replace by doctor's name
+            }])
+        ).values()
+      );
 
-    /*filteredEdges = allEdges.filter(
-      (edge) => edge.source === targetId || edge.target === targetId
-    );
-    filteredEdges.forEach((edge) => {
-      connectedIds.add(edge.source);
-      connectedIds.add(edge.target);
-    });
-
-    filteredNodes = allNodes.filter((node) => connectedIds.has(node.id));*/
-
-    console.log("Final", {nodes, edges})
-
-    self.postMessage({
-      success: true,
-      data: {nodes, edges}
-    });
+      self.postMessage({
+        success: true,
+        dataType,
+        data: doctors,
+      });
+    }
   } catch (error) {
-    self.postMessage({ success: false, error: (error as Error).message });
+    self.postMessage({
+      success: false,
+      dataType,
+      error: (error as Error).message
+    });
   }
 };
 

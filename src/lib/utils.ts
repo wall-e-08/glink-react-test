@@ -8,3 +8,15 @@ export function cn(...inputs: ClassValue[]) {
 export function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export function idMaker(category: string, doctorId: string) {
+  return `(\'${category}\', \'${doctorId}\')`;
+}
+
+export function idParser(id: string) {
+  const match = id.match(/^\('([^']+)', '([^']+)'\)$/);
+  if (match) {
+    return { category: match[1], doctorId: match[2] };
+  }
+  throw new Error(`Invalid ID format: ${id}`);
+}
