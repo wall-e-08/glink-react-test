@@ -23,7 +23,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
     return
   }
 
-  console.log("centerId", centerId)
+  console.log("==worker==", " : ", "centerId", centerId)
 
   try {
     if (!cachedData) {
@@ -39,7 +39,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
       // todo: typescript types
       const json = parser.parse(json_data);
       const graph = json.graphml.graph;
-      console.log("graph", graph)
+      console.log("==worker==", " : ", "graph", dataType, graph)
 
       // raw data
       let nodes = Array.isArray(graph.node) ? graph.node : [graph.node];
@@ -51,7 +51,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
         timestamp: Date.now(),
       }
 
-      console.log("Data has been cached")
+      console.log("==worker==", " : ", "Data has been cached")
     }
 
     // todo: confirm if the source is only match
@@ -68,7 +68,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 
     if (dataType === "PARSED_DATA") {
       let edges = rawEdges.filter(_edge => _edge.source === centerId || _edge.target === centerId)
-      console.log("filtered edges", edges)
+      console.log("==worker==", " : ", "filtered edges", edges)
 
       const nodeIds = new Set<string>();
       nodeIds.add(centerId);
@@ -101,7 +101,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 
       filteredNodes = allNodes.filter((node) => connectedIds.has(node.id));*/
 
-      console.log("Final", {nodes, edges})
+      console.log("==worker==", " : ", "Final", {nodes, edges})
 
       self.postMessage({
         success: true,

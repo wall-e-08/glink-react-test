@@ -66,7 +66,7 @@ const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
         }]*/
 
         setRawData(data)
-        console.log(data)
+        console.log(NetworkVisualization.name, "=> ", "rawdata->", data)
       } else {
         console.error('Error loading GraphML:', error);
       }
@@ -133,6 +133,8 @@ const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
     }
   }, []);
 
+  // console.log(NetworkVisualization.name, "=> ", "graphData", graphData)
+
   if (!graphData) return <div>Loading...</div>;
 
   // todo: throttle animation
@@ -150,13 +152,13 @@ const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
         // performance optimizations
         // https://github.com/vasturiano/react-force-graph/issues/223#issuecomment-695749322
         // warmupTicks={100}
-        // cooldownTicks={0} // improves performance by stopping simulation quickly
+        cooldownTicks={10} // improves performance by stopping simulation quickly
         linkDirectionalArrowLength={4}
         linkDirectionalArrowRelPos={1}
         linkLabel={_link => _link.data?.['#text'] || ''}
         // pauseAnimation={true}
         onEngineStop={() => {
-          fgRef.current.zoomToFit(100, 40);
+          fgRef.current?.zoomToFit(100, 40);
           // fgRef.current.zoom(1250)
         }}
       />

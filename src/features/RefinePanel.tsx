@@ -1,8 +1,8 @@
 import {useState} from 'react';
-import RoundedDiv from "@/components/RoundedDiv";
 import {Funnel, X} from "lucide-react";
+import RoundedDiv from "@/components/RoundedDiv";
 import {MultiDropdownOption, MultiSelectDropdown} from "@/components/MultiSelectDropdown";
-import SearchDropdown from "@/features/SearchDropdown";
+import SearchDropdown, {Item} from "@/features/SearchDropdown";
 
 const filterOptions:(MultiDropdownOption)[] = [
   { label: "Filter 1", value: "Filter 1" },
@@ -11,18 +11,21 @@ const filterOptions:(MultiDropdownOption)[] = [
   { label: "Filter 4", value: "Filter 4" },
 ]
 
-const RefinePanel = ({doctorsList}) => {
+type RefinePanelProps = {
+  doctorsList: Item[];
+  onSelect?: (item: Item) => void;
+}
+
+const RefinePanel = ({doctorsList, onSelect}: RefinePanelProps) => {
   const [selectedFilter, setSelectedFilter] = useState<string[]>([])
 
   return (
     <RoundedDiv className="flex flex-row gap-4 text-secondary">
       <SearchDropdown
         data={doctorsList}
-        onSelect={(item) => {
-          console.log("Selected:", item);
-        }}
+        onSelect={onSelect}
       />
-      <div className=" w-[20%] h-full text-test flex relative">
+      <div className="w-[20%] h-full text-test flex relative">
         <Funnel
           className="absolute left-2 top-1/2 transform -translate-y-1/2 pointer-events-none"
           size={16}

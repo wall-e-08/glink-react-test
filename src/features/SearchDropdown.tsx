@@ -1,21 +1,23 @@
-import { useState, useMemo } from "react";
+import {useState, useMemo, useRef, useEffect} from "react";
 import { Search } from "lucide-react";
 import clsx from "clsx";
 
-type Item = {
+
+export type Item = {
   id: string;
   label: string;
 };
 
-type Props = {
+type SearchDropdownProps = {
   data: Item[];
   onSelect?: (item: Item) => void;
 };
 
 // todo: search by doctor's name
-export function SearchDropdown({ data, onSelect }: Props) {
+export function SearchDropdown({ data, onSelect }: SearchDropdownProps) {
   const [search, setSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const filteredData = useMemo(() => {
     if (!search.trim()) return data.slice(0, 10);
@@ -26,13 +28,24 @@ export function SearchDropdown({ data, onSelect }: Props) {
   }, [search, data]);
 
   const handleSelect = (item: Item) => {
-    setSearch(item.label);
+    setSearch(item.id);
     setShowDropdown(false);
     onSelect?.(item);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="relative w-full flex items-center flex-1">
+    <div className="relative w-full flex items-center flex-1" ref={wrapperRef}>
       <div className="flex items-center flex-1 relative">
         <Search className="absolute left-2 pointer-events-none text-gray-500" size={18} />
         <input
@@ -50,7 +63,7 @@ export function SearchDropdown({ data, onSelect }: Props) {
       </div>
 
       {showDropdown && (
-        <ul className="absolute z-10 mt-1 w-full max-h-60 overflow-auto border border-gray-300 bg-white rounded-md shadow-lg">
+        <ul className="absolute top-8 z-10 mt-1 w-full max-h-60 overflow-auto border border-gray-300 bg-white rounded-md shadow-lg">
           {filteredData.length > 0 ? (
             filteredData.map((item) => (
               <li
@@ -58,7 +71,7 @@ export function SearchDropdown({ data, onSelect }: Props) {
                 onClick={() => handleSelect(item)}
                 className="px-4 py-2 hover:bg-blue-100 cursor-pointer text-sm"
               >
-                {item.label} <span className="text-gray-400 text-xs">({item.id})</span>
+                {item.label} <span className="text-gray-400 text-xs">{item.id}</span>
               </li>
             ))
           ) : (
