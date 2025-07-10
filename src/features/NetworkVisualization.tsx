@@ -1,9 +1,12 @@
 import React, {useEffect, useState, useMemo, useCallback, useRef, RefObject, ReactNode} from 'react';
 import ForceGraph2D from "react-force-graph-2d";
+import {idMaker} from "@/lib/utils";
+
 import img1 from '@/assets/doc1.jpg';
 import img2 from '@/assets/doc2.jpg';
 import img3 from '@/assets/doc3.jpg';
-import {idMaker} from "@/lib/utils";
+import imgBook from '@/assets/book.svg';
+import imgLibrary from '@/assets/library.svg';
 
 
 // todo: dummy image
@@ -83,22 +86,26 @@ const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
     if (!rawData || !rawData.nodes || !rawData.edges) return null;
 
     return {
-      nodes: rawData.nodes.map((node: any) => ({
-        ...node,
-        img: IMAGES[Math.floor(Math.random() * IMAGES.length)],
-      })),
+      nodes: rawData.nodes.map((node: any) => {
+        let img;
+        switch (node.data['#text']) {
+          case 'BookPublication':
+            img = imgBook;
+            break;
+          case 'Publisher':
+            img = imgLibrary;
+            break;
+          default:
+            img = IMAGES[Math.floor(Math.random() * IMAGES.length)];
+        }
+        return {
+          ...node,
+          img,
+        };
+      }),
       links: rawData.edges,
     };
   }, [rawData]);
-
-  /*useEffect(() => {
-    if (fgRef.current && graphData) {
-      // Wait for a tick before zooming
-      setTimeout(() => {
-        fgRef.current.zoomToFit(100); // 100ms transition
-      }, 100);
-    }
-  }, [graphData]);*/
 
   // Memoized canvas renderer with rounded image nodes
   const drawNode = useCallback((node: any, ctx: CanvasRenderingContext2D) => {
@@ -149,16 +156,13 @@ const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
         graphData={graphData}
         nodeCanvasObject={drawNode}
 
-        // performance optimizations
-        // https://github.com/vasturiano/react-force-graph/issues/223#issuecomment-695749322
-        // warmupTicks={100}
-        cooldownTicks={10} // improves performance by stopping simulation quickly
+        cooldownTicks={10}
         linkDirectionalArrowLength={4}
         linkDirectionalArrowRelPos={1}
         linkLabel={_link => _link.data?.['#text'] || ''}
         // pauseAnimation={true}
         onEngineStop={() => {
-          fgRef.current?.zoomToFit(100, 40);
+          fgRef.current?.zoomToFit(100, 150);
           // fgRef.current.zoom(1250)
         }}
       />

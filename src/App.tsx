@@ -1,5 +1,5 @@
-import {useEffect, useMemo, useState} from "react";
-import '@/App.css'
+import {lazy, Suspense, useEffect, useState} from "react";
+
 import Sidebar from "@/features/Sidebar";
 import Topbar from "@/features/Topbar";
 import RefinePanel from "@/features/RefinePanel";
@@ -8,6 +8,12 @@ import ProfileDetails from "@/features/ProfileDetails";
 import NetworkVisualization from "@/features/NetworkVisualization";
 import type {Item} from "@/features/SearchDropdown";
 import {idParser} from "@/lib/utils";
+
+import '@/App.css'
+
+const NetworkVisualization = lazy(
+  () => import('@/features/NetworkVisualization')
+);
 
 const dataLoadWorker = new Worker(
   new URL('@/workers/dataLoad.worker.ts', import.meta.url),
@@ -29,8 +35,9 @@ function App() {
         if (data.length > 0) {
           setDoctorsList(data);
           console.log(App.name, '-> doctorsList =>', data);
-          const parsed = idParser(data[0].id);
-          setSingleDoctorData(parsed);
+          // const parsed = idParser(data[0].id);
+          // hardcoded for preview
+          setSingleDoctorData({category: 'Researcher', doctorId: '0000-0003-0427-0369'});
         } else {
           setDoctorsList([])
         }
@@ -63,15 +70,15 @@ function App() {
             <ProfileDetails/>
           </div>
           <div className="w-1/2 overflow-hidden">
-            {singleDoctorData.doctorId ? (
-              <NetworkVisualization
-                doctorId={singleDoctorData.doctorId}
-                category={singleDoctorData.category}
-                dataLoadWorker={dataLoadWorker}
-              />
-            ) : (
-              <div>Loading...</div>
-            )}
+            {doctorsList.length > 0 ? (
+              <Suspense fallback={<div>Loading...</div>}>
+                <NetworkVisualization
+                  doctorId={singleDoctorData.doctorId}  // 0000-0002-7034-5843
+                  category={singleDoctorData.category}
+                  dataLoadWorker={dataLoadWorker}
+                />
+              </Suspense>
+            ) : <div>Loading...</div>}
           </div>
         </section>
       </main>

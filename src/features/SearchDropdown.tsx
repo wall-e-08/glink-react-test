@@ -1,5 +1,5 @@
 import {useState, useMemo, useRef, useEffect} from "react";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import clsx from "clsx";
 
 
@@ -60,6 +60,13 @@ export function SearchDropdown({ data, onSelect }: SearchDropdownProps) {
           onFocus={() => setShowDropdown(true)}
           onChange={(e) => setSearch(e.target.value)}
         />
+        {search && (
+          <X
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 cursor-pointer"
+            size={16}
+            onClick={() => setSearch('')}
+          />
+        )}
       </div>
 
       {showDropdown && (
