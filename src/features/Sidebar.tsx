@@ -16,7 +16,6 @@ const Sidebar = (props) => {
       />
       <IconWrapper
         icon="User"
-        active
         className="cursor-pointer"
       />
       <IconWrapper

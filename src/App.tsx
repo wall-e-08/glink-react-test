@@ -4,7 +4,6 @@ import Sidebar from "@/features/Sidebar";
 import Topbar from "@/features/Topbar";
 import RefinePanel from "@/features/RefinePanel";
 import ProfileCard from "@/features/ProfileCard";
-import ProfileDetails from "@/features/ProfileDetails";
 import NetworkVisualization from "@/features/NetworkVisualization";
 import type {Item} from "@/features/SearchDropdown";
 import {idParser} from "@/lib/utils";
@@ -65,11 +64,10 @@ function App() {
         />
         <h2 className="font-bold text-3xl my-4">PeerSpace</h2>
         <section className="flex flex-row gap-4">
-          <div className="w-1/2">
+          <div className="w-1/3 max-h-[70vh] overflow-y-scroll profile-scrollbar">
             <ProfileCard/>
-            <ProfileDetails/>
           </div>
-          <div className="w-1/2 overflow-hidden">
+          <div className="w-2/3 max-h-[70vh] overflow-hidden">
             {doctorsList.length > 0 ? (
               <Suspense fallback={<div>Loading...</div>}>
                 <NetworkVisualization

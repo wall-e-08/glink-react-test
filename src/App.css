@@ -1,0 +1,24 @@
+.profile-scrollbar {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #c4c4c4 #f1f1f1;
+}
+
+.profile-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.profile-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.profile-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #c4c4c4;
+  border-radius: 10px;
+  border: 3px solid transparent; /* For some padding between thumb and track */
+  background-clip: content-box;
+}
+
+.profile-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #b0b0b0;
+}

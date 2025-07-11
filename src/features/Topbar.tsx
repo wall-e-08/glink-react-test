@@ -1,14 +1,11 @@
-import {useState} from 'react';
 import RoundedDiv from "@/components/RoundedDiv";
 import {Switch} from "@/components/shadcn/switch";
 import {Label} from "@/components/shadcn/label";
 import docImg1 from "@/assets/doc1.jpg";
 import {Button} from "@/components/shadcn/button";
-import InlineInfo from "../components/InlineInfo";
+import InlineInfo from "@/components/InlineInfo";
 
-const Topbar = (props) => {
-  const [state, setState] = useState()
-
+const Topbar = () => {
   return (
     <div className="flex flex-row gap-4 mb-4">
       <RoundedDiv className="flex-1 flex justify-between items-center">

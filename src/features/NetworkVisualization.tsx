@@ -151,7 +151,7 @@ const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
     <div className="size-full overflow-hidden">
       <ForceGraph2D
         ref={fgRef}
-        width={window.innerWidth / 2}
+        width={window.innerWidth * 2 / 3 - 100} // based on parent component from App.tsx
         backgroundColor="#fff"
         graphData={graphData}
         nodeCanvasObject={drawNode}
