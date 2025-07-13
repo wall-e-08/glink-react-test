@@ -1,0 +1,7 @@
+---
+services:
+  testing-docker-react-tailscale:
+    image: ghcr.io/wall-e-08/glink-react-test:latest
+    ports:
+      - "6662:80"
+    restart: always
