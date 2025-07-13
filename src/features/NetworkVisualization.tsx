@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useMemo, useCallback, useRef, RefObject, ReactNode} from 'react';
+import React, {useEffect, useState, useMemo, useCallback, useRef} from 'react';
 import ForceGraph2D from "react-force-graph-2d";
 import {idMaker} from "@/lib/utils";
 
@@ -27,7 +27,7 @@ const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
   category,
   dataLoadWorker
 }) => {
-  const fgRef:RefObject<HTMLDivElement | null> = useRef(null);
+  const fgRef: any = useRef(null);
   const [rawData, setRawData] = useState<any | null>(null);
   // const [graphData, setGraphData] = useState<any | null>(null);
 

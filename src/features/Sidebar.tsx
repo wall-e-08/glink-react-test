@@ -1,65 +1,65 @@
-import {useState} from 'react';
 import RoundedDiv from "@/components/RoundedDiv";
 import IconWrapper from "@/components/IconWrapper";
+import {Search, User, MessageCircle, Bell, Book,
+    BookOpen, Calendar, Award, Target, Package,
+    CreditCard, Settings, LogOut} from "lucide-react";
 import glnkIconOnly from "@/assets/glnk-icon-only.png";
 
-const Sidebar = (props) => {
-  const [state, setState] = useState()
-
+const Sidebar = () => {
   return (
     <RoundedDiv className="flex flex-col gap-2 w-fit">
       <img src={glnkIconOnly} alt="GLnk" className="w-[40px] mb-1"/>
       <IconWrapper
-        icon="Search"
+        Icon={Search}
         active
         className="cursor-pointer"
       />
       <IconWrapper
-        icon="User"
+        Icon={User}
         className="cursor-pointer"
       />
       <IconWrapper
-        icon="MessageCircle"
+        Icon={MessageCircle}
         className="cursor-pointer"
       />
       <IconWrapper
-        icon="Bell"
+        Icon={Bell}
         className="cursor-pointer"
       />
       <IconWrapper
-        icon="Book"
+        Icon={Book}
         className="cursor-pointer"
       />
       <IconWrapper
-        icon="BookOpen"
+        Icon={BookOpen}
         className="cursor-pointer"
       />
       <IconWrapper
-        icon="Calendar"
+        Icon={Calendar}
         className="cursor-pointer"
       />
       <IconWrapper
-        icon="Award"
+        Icon={Award}
         className="cursor-pointer"
       />
       <IconWrapper
-        icon="Target"
+        Icon={Target}
         className="cursor-pointer"
       />
       <IconWrapper
-        icon="Package"
+        Icon={Package}
         className="cursor-pointer"
       />
       <IconWrapper
-        icon="CreditCard"
+        Icon={CreditCard}
         className="cursor-pointer"
       />
       <IconWrapper
-        icon="Settings"
+        Icon={Settings}
         className="cursor-pointer mb-4"
       />
       <IconWrapper
-        icon="LogOut"
+        Icon={LogOut}
         className="cursor-pointer mt-auto"
       />
     </RoundedDiv>

@@ -1,4 +1,5 @@
-import {LucideIcon, HeartPulse, Star, EllipsisVertical, TrendingUp} from "lucide-react";
+import {HeartPulse, Star, EllipsisVertical, TrendingUp} from "lucide-react";
+import type {LucideIcon} from "lucide-react";
 import profileBg from "@/assets/profile-bg.jpg";
 import profileImg from "@/assets/doc1.jpg";
 import RoundedDiv from "@/components/RoundedDiv";

@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcn/popover"
 import { Button } from "@/components/shadcn/button"
 import { Checkbox } from "@/components/shadcn/checkbox"
@@ -39,7 +39,7 @@ export function MultiSelectDropdown({
     setOpen(false)
   }
 
-  const onOpenChangeHandler = isOpen => {
+  const onOpenChangeHandler = (isOpen: boolean) => {
     setOpen(isOpen);
     if (isOpen) setTmpSelected(selected)
   }

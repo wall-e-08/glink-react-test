@@ -4,7 +4,6 @@ import Sidebar from "@/features/Sidebar";
 import Topbar from "@/features/Topbar";
 import RefinePanel from "@/features/RefinePanel";
 import ProfileCard from "@/features/ProfileCard";
-import NetworkVisualization from "@/features/NetworkVisualization";
 import type {Item} from "@/features/SearchDropdown";
 import {idParser} from "@/lib/utils";
 

@@ -66,7 +66,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 
     const {rawNodes, rawEdges} = cachedData;
 
-    if (dataType === "PARSED_DATA") {
+    if (dataType === "PARSED_DATA" && centerId) {
       let edges = rawEdges.filter(_edge => _edge.source === centerId || _edge.target === centerId)
       console.log("==worker==", " : ", "filtered edges", edges)
 

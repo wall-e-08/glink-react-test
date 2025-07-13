@@ -1,8 +1,10 @@
 import {useState} from 'react';
 import {Funnel, X} from "lucide-react";
 import RoundedDiv from "@/components/RoundedDiv";
-import {MultiDropdownOption, MultiSelectDropdown} from "@/components/MultiSelectDropdown";
-import SearchDropdown, {Item} from "@/features/SearchDropdown";
+import {MultiSelectDropdown} from "@/components/MultiSelectDropdown";
+import type {MultiDropdownOption} from "@/components/MultiSelectDropdown";
+import SearchDropdown from "@/features/SearchDropdown";
+import type {Item} from "@/features/SearchDropdown";
 
 const filterOptions:(MultiDropdownOption)[] = [
   { label: "Filter 1", value: "Filter 1" },
