@@ -27,7 +27,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 
   try {
     if (!cachedData) {
-      const response = await fetch('/data.graphml');
+      const response = await fetch(`${import.meta.env.BASE_URL}data.graphml`);
       const json_data = await response.text();
 
       // Parse GraphML to JSON

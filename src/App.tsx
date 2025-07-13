@@ -35,7 +35,7 @@ function App() {
           console.log(App.name, '-> doctorsList =>', data);
           // const parsed = idParser(data[0].id);
           // hardcoded for preview
-          setSingleDoctorData({category: 'Researcher', doctorId: '0000-0003-0427-0369'});
+          setSingleDoctorData({category: 'Researcher', doctorId: '0000-0001-8099-3863'});
         } else {
           setDoctorsList([])
         }
