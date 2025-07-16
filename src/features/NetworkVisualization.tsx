@@ -1,20 +1,18 @@
-import React, {useEffect, useState, useMemo, useCallback, useRef} from 'react';
-import ForceGraph2D from "react-force-graph-2d";
-import {idMaker} from "@/lib/utils";
-
+import React, {useEffect, useMemo, useRef, useState} from "react";
+import { Network, DataSet } from "vis-network/standalone";
+import "vis-network/styles/vis-network.css";
+import {idMaker, idParser} from "@/lib/utils";
 import img1 from '@/assets/doc1.jpg';
 import img2 from '@/assets/doc2.jpg';
 import img3 from '@/assets/doc3.jpg';
 import imgBook from '@/assets/book.svg';
 import imgLibrary from '@/assets/library.svg';
+import type {EdgeType, NodeType} from "@/workers/dataLoad.worker";
 
 
 // todo: dummy image
 // todo: use LRU cache to load images on demand for all images
 const IMAGES = [img1, img2, img3];
-
-// Preload and cache images globally to improve performance
-const imageCache: Record<string, HTMLImageElement> = {};
 
 type NetworkVisualizationProps = {
   doctorId: string;
@@ -22,14 +20,94 @@ type NetworkVisualizationProps = {
   dataLoadWorker: Worker;
 };
 
+type PositionType = {x: Number, y: Number}
+
 const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
   doctorId,
   category,
   dataLoadWorker
 }) => {
-  const fgRef: any = useRef(null);
-  const [rawData, setRawData] = useState<any | null>(null);
-  // const [graphData, setGraphData] = useState<any | null>(null);
+  const networkRef = useRef<HTMLElement | null>(null);
+  const [hoverNode, setHoverNode] = useState<NodeType>(null);
+  const [clickNode, setClickNode] = useState<NodeType>(null);
+  const [hoverPosition, setHoverPosition] = useState<PositionType>({ x: 0, y: 0 });
+  const [clickPosition, setClickPosition] = useState<PositionType>({ x: 0, y: 0 });
+
+  /*useEffect(() => {
+    const staticNodes = new DataSet([
+      {
+        id: "1",
+        label: "User",
+        image: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+        shape: "image"
+      },
+      {
+        id: "2",
+        label: "Server",
+        image: "https://cdn-icons-png.flaticon.com/512/2885/2885253.png",
+        shape: "image"
+      },
+      {
+        id: "3",
+        label: "Database",
+        image: "https://cdn-icons-png.flaticon.com/512/4299/4299956.png",
+        shape: "image"
+      }
+    ]);
+
+    const staticEdges = new DataSet([
+      { id: "1", from: "1", to: "2" },
+      { id: "2", from: "2", to: "3" }
+    ]);
+
+    nodesRef.current = staticNodes;
+    edgesRef.current = staticEdges;
+
+    const container = networkRef.current;
+    const data = {
+      nodes: staticNodes,
+      edges: staticEdges
+    };
+
+    const options = {
+      clickToUse: true,
+      interaction: { hover: true }
+    };
+
+    const network = new Network(container, data, options);
+
+    network.on("click", (event) => {
+      if (event.nodes.length > 0) {
+        const nodeId = event.nodes[0];
+        const node = staticNodes.get(nodeId);
+        const pos = network.getPositions([nodeId])[nodeId];
+        const domPos = network.canvasToDOM(pos);
+
+        setClickNode(node);
+        setClickPosition({ x: domPos.x, y: domPos.y });
+      } else {
+        setClickNode(null); // click on empty space
+      }
+    });
+
+    network.on("hoverNode", (event) => {
+      const nodeId = event.node;
+      const node = staticNodes.get(nodeId);
+      const pos = network.getPositions([nodeId])[nodeId];
+      const domPos = network.canvasToDOM(pos);
+
+      setHoverNode(node);
+      setHoverPosition({ x: domPos.x, y: domPos.y });
+    });
+
+    network.on("blurNode", () => {
+      setHoverNode(null);
+    });
+
+    return () => {
+      network.destroy();
+    };
+  }, []);*/
 
   const centerId = useMemo(() => {
     return idMaker(category, doctorId);
@@ -37,137 +115,133 @@ const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
 
   useEffect(() => {
     dataLoadWorker.onmessage = e => {
-      const { success, data, error } = e.data;
+      const { success, data, error, dataType } = e.data;
 
-      if (success) {
-        /*console.log(JSON.stringify(data.edges.slice(0, 2)))
+      if (dataType !== "PARSED_DATA") return;
 
-        let edges = [{
-          "source": "('Researcher', '0000-0003-0427-0369')",
-          "target": "('BookPublication', 'The role of complement dysregulation in AMD mouse models')",
-          "data": {"#text": "AUTHORED", "key": "labels"}
-        }, {
-          "source": "('BookPublication', 'The role of complement dysregulation in AMD mouse models')",
-          "target": "('Publisher', 'Advances in Experimental Medicine and Biology')",
-          "data": {"#text": "PUBLISHED_BY", "key": "labels"}
-        }]
+      if (success && data) {
+        const nodes = new DataSet(
+          data.nodes.map((node: NodeType) => {
+            let img;
+            switch (node.data['#text']) {
+              case 'BookPublication':
+              case 'OtherPublication':
+                img = imgBook;
+                break;
+              case 'Publisher':
+                img = imgLibrary;
+                break;
+              default:
+                img = IMAGES[Math.floor(Math.random() * IMAGES.length)];
+            }
+            return {
+              id: node.id,
+              label: node.data['#text'],
+              shape: "image",
+              image: img
+            }
+          })
+        );
+        const edges = new DataSet(
+          data.edges.map((edge: EdgeType, index: number) => ({
+            id: `${index}`,
+            from: edge.source,
+            to: edge.target,
+            // label: edge.data['#text'],
+          }))
+        );
 
+        const network = new Network(
+          networkRef.current,
+          { nodes, edges },
+          {
+            interaction: { hover: true },}
+        );
 
-        console.log(JSON.stringify(data.nodes.slice(0, 3)))
-        let nodesa = [{
-          "id": "('Researcher', '0000-0003-0427-0369')",
-          "label": "Researcher",
-          "data": {"#text": "Researcher", "key": "labels"}
-        }, {
-          "id": "('BookPublication', 'The role of complement dysregulation in AMD mouse models')",
-          "label": "BookPublication",
-          "data": {"#text": "BookPublication", "key": "labels"}
-        }, {
-          "id": "('Publisher', 'Advances in Experimental Medicine and Biology')",
-          "label": "Publisher",
-          "data": {"#text": "Publisher", "key": "labels"}
-        }]*/
+        network.on("click", e => {
+          if (e.nodes.length > 0) {
+            const nodeId = e.nodes[0];
+            const node = nodes.get(nodeId);
+            const pos = network.getPositions([nodeId])[nodeId];
+            const domPos = network.canvasToDOM(pos);
+            setClickNode(node);
+            setClickPosition({
+              x: domPos.x,
+              y: domPos.y
+            });
+          } else {
+            setClickNode(null);
+          }
+        });
 
-        setRawData(data)
-        console.log(NetworkVisualization.name, "=> ", "rawdata->", data)
+        network.on("hoverNode", e => {
+          const nodeId = e.node;
+          const node = nodes.get(nodeId);
+          const pos = network.getPositions([nodeId])[nodeId];
+          const domPos = network.canvasToDOM(pos);
+          setHoverNode(node);
+          setHoverPosition({
+            x: domPos.x,
+            y: domPos.y
+          });
+        });
+
+        network.on("blurNode", () => {
+          setHoverNode(null);
+        });
       } else {
-        console.error('Error loading GraphML:', error);
+        console.error("Error loading graph data from dataLoadWorker:", error);
       }
     };
 
     dataLoadWorker.postMessage({
-      dataType: 'PARSED_DATA',
-      centerId,
+      dataType: "PARSED_DATA",
+      centerId
     });
   }, [centerId]);
 
-  // Memoize transformed graph data
-  const graphData = useMemo(() => {
-    if (!rawData || !rawData.nodes || !rawData.edges) return null;
-
-    return {
-      nodes: rawData.nodes.map((node: any) => {
-        let img;
-        switch (node.data['#text']) {
-          case 'BookPublication':
-            img = imgBook;
-            break;
-          case 'Publisher':
-            img = imgLibrary;
-            break;
-          default:
-            img = IMAGES[Math.floor(Math.random() * IMAGES.length)];
-        }
-        return {
-          ...node,
-          img,
-        };
-      }),
-      links: rawData.edges,
-    };
-  }, [rawData]);
-
-  // Memoized canvas renderer with rounded image nodes
-  const drawNode = useCallback((node: any, ctx: CanvasRenderingContext2D) => {
-    const size = 12;
-    const imgSize = 16;
-
-    // Use cached image or load it
-    let img = imageCache[node.img];
-    if (!img) {
-      img = new Image();
-      img.src = node.img;
-      img.width = imgSize;
-      img.height = imgSize;
-      imageCache[node.img] = img;
-    }
-
-    if (img.complete) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(node.x, node.y, size/2, 0, 2 * Math.PI);
-      ctx.clip();
-
-      ctx.drawImage(img, node.x - size / 2, node.y - size / 2, size, size);
-      ctx.restore();
-
-      // border
-      ctx.beginPath();
-      ctx.arc(node.x, node.y, size/2, 0, 2 * Math.PI, false);
-      ctx.lineWidth = 0.25;
-      ctx.strokeStyle = '#f00';
-      ctx.stroke();
-    }
-  }, []);
-
-  // console.log(NetworkVisualization.name, "=> ", "graphData", graphData)
-
-  if (!graphData) return <div>Loading...</div>;
-
-  // todo: throttle animation
-  // https://github.com/vasturiano/react-force-graph/issues/334
-
   return (
-    <div className="size-full overflow-hidden">
-      <ForceGraph2D
-        ref={fgRef}
-        width={window.innerWidth * 2 / 3 - 100} // based on parent component from App.tsx
-        backgroundColor="#fff"
-        graphData={graphData}
-        nodeCanvasObject={drawNode}
-
-        cooldownTicks={10}
-        linkDirectionalArrowLength={4}
-        linkDirectionalArrowRelPos={1}
-        linkLabel={_link => _link.data?.['#text'] || ''}
-        // pauseAnimation={true}
-        onEngineStop={() => {
-          fgRef.current?.zoomToFit(100, 150);
-          // fgRef.current.zoom(1250)
-        }}
+    <div className="relative">
+      {/* main graph */}
+      <div
+        ref={networkRef}
+        className="relative w-full h-[500px] border border-gray-300"
       />
+
+      {hoverNode && (
+        <div
+          className="absolute bg-white px-2 py-1 border border-gray-200 rounded text-xs shadow-md"
+          style={{
+            top: hoverPosition.y + 10,
+            left: hoverPosition.x + 10
+          }}
+        >
+          {idParser(hoverNode.id)['doctorId']}
+        </div>
+      )}
+
+      {clickNode && (
+        <div
+          className="absolute bg-gray-50 p-3 border border-gray-400 rounded-lg z-10 shadow-lg text-sm"
+          style={{
+            top: clickPosition.y + 20,
+            left: clickPosition.x + 20
+          }}
+        >
+          <p>{(() => {
+            const parsedData = idParser(clickNode.id);
+            return `${parsedData.category}: ${parsedData.doctorId}`;
+          })()}</p>
+          <button
+            onClick={() => setClickNode(null)}
+            className="mt-2 text-blue-600 hover:underline"
+          >
+            Close
+          </button>
+        </div>
+      )}
     </div>
-  )
+  );
 };
 
 export default NetworkVisualization;

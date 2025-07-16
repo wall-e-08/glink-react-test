@@ -7,9 +7,25 @@ type WorkerMessage = {
   centerId?: string;
 };
 
+type NodeEdgeDataType = {
+  key: string;
+  "#text": string;
+}
+
+export type NodeType = {
+  id: string;
+  data: NodeEdgeDataType;
+};
+
+export type EdgeType = {
+  source: string;
+  target: string;
+  data: NodeEdgeDataType;
+};
+
 type CachedJsonGraphData = {
-  rawNodes: any[];
-  rawEdges: any[];
+  rawNodes: NodeType[];
+  rawEdges: EdgeType[];
   timestamp: number;
 };
 
@@ -42,8 +58,8 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
       console.log("==worker==", " : ", "graph", dataType, graph)
 
       // raw data
-      let nodes = Array.isArray(graph.node) ? graph.node : [graph.node];
-      let edges = Array.isArray(graph.edge) ? graph.edge : [graph.edge];
+      let nodes: NodeType[] = Array.isArray(graph.node) ? graph.node : [graph.node];
+      let edges: EdgeType[] = Array.isArray(graph.edge) ? graph.edge : [graph.edge];
 
       cachedData = {
         rawNodes: nodes,
@@ -64,7 +80,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
     //   }))
     //   .filter(_node => _node.id === centerId);
 
-    const {rawNodes, rawEdges} = cachedData;
+    const {rawNodes, rawEdges}: Omit<CachedJsonGraphData, 'timestamp'> = cachedData;
 
     if (dataType === "PARSED_DATA" && centerId) {
       let edges = rawEdges.filter(_edge => _edge.source === centerId || _edge.target === centerId)
