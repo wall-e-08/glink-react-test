@@ -8,6 +8,7 @@ import img3 from '@/assets/doc3.jpg';
 import imgBook from '@/assets/book.svg';
 import imgLibrary from '@/assets/library.svg';
 import type {EdgeType, NodeType} from "@/workers/dataLoad.worker";
+import type {Edge, Node} from "vis-network";
 
 
 // todo: dummy image
@@ -20,16 +21,19 @@ type NetworkVisualizationProps = {
   dataLoadWorker: Worker;
 };
 
-type PositionType = {x: Number, y: Number}
+type PositionType = {x: number, y: number}
 
 const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
   doctorId,
   category,
   dataLoadWorker
 }) => {
-  const networkRef = useRef<HTMLElement | null>(null);
-  const [hoverNode, setHoverNode] = useState<NodeType>(null);
-  const [clickNode, setClickNode] = useState<NodeType>(null);
+  const networkRef = useRef<any>(null);
+
+  // used 'any' type to prevent conflicts with vis-network types
+  const [hoverNode, setHoverNode] = useState<any>(null);
+  const [clickNode, setClickNode] = useState<any>(null);
+
   const [hoverPosition, setHoverPosition] = useState<PositionType>({ x: 0, y: 0 });
   const [clickPosition, setClickPosition] = useState<PositionType>({ x: 0, y: 0 });
 
@@ -120,7 +124,7 @@ const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
       if (dataType !== "PARSED_DATA") return;
 
       if (success && data) {
-        const nodes = new DataSet(
+        const nodes = new DataSet<Node>(
           data.nodes.map((node: NodeType) => {
             let img;
             switch (node.data['#text']) {
@@ -142,7 +146,7 @@ const NetworkVisualization: React.FC<NetworkVisualizationProps> = ({
             }
           })
         );
-        const edges = new DataSet(
+        const edges = new DataSet<Edge>(
           data.edges.map((edge: EdgeType, index: number) => ({
             id: `${index}`,
             from: edge.source,
